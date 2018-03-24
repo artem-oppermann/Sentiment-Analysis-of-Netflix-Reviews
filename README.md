@@ -90,7 +90,8 @@ After the training some samples from the validation set are selected and the mod
     REVIEW: i don t think this movie loves women at all                                        
     SENTIMENT: negativ 
 
-    REVIEW: even if the ring has a familiar ring it s still unusually crafty and intelligent for hollywood horror                           SENTIMENT: positiv 
+    REVIEW: even if the ring has a familiar ring it s still unusually crafty and intelligent for hollywood horror   
+    SENTIMENT: positiv 
 
     REVIEW: expands the horizons of boredom to the point of collapse turning into a black hole of dullness 
             from which no interesting concept can escape                          
