@@ -42,8 +42,8 @@ After the training some samples from the validation set are selected and the mod
 
     TEST SAMPLES: 
 
-    REVIEW: my big fat greek wedding is not only the best date movie of the year it s also a dare i say it twice delightfully 
-            charming and totally american i might add slice of comedic bliss              
+    REVIEW: my big fat greek wedding is not only the best date movie of the year it s also a dare i say it 
+            twice delightfully charming and totally american i might add slice of comedic bliss              
     SENTIMENT: positiv 
 
     REVIEW: what an embarrassment                                               
@@ -55,32 +55,36 @@ After the training some samples from the validation set are selected and the mod
     REVIEW: the latest adam sandler assault and possibly the worst film of the year                                     
     SENTIMENT: negativ 
 
-    REVIEW: quite frankly i can t see why any actor of talent would ever work in a mcculloch production again if they 
-            looked at how this movie turned out                      
+    REVIEW: quite frankly i can t see why any actor of talent would ever work in a mcculloch production 
+            again if they looked at how this movie turned out                      
     SENTIMENT: negativ 
 
     REVIEW: a wildly entertaining scan of evans career                                           
     SENTIMENT: negativ 
 
-    REVIEW: clooney s debut can be accused of being a bit undisciplined but it has a tremendous offbeat sense of style
-            and humor that suggests he was influenced by some of the filmmakers who have directed him especially the 
-            coen brothers and steven soderbergh      
+    REVIEW: clooney s debut can be accused of being a bit undisciplined but it has a tremendous offbeat 
+             sense of style and humor that suggests he was influenced by some of the filmmakers who have
+             directed him especially the coen brothers and steven soderbergh      
     SENTIMENT: positiv 
 
-    REVIEW: michele is a such a brainless flibbertigibbet that it s hard to take her spiritual quest at all seriously                       SENTIMENT: positiv 
+    REVIEW: michele is a such a brainless flibbertigibbet that it s hard to take her spiritual quest at 
+            all seriously                       
+    SENTIMENT: positiv 
 
-    REVIEW: the best way to describe it is as a cross between paul thomas anderson s magnolia and david lynch s mulholland dr               SENTIMENT: negativ 
+    REVIEW: the best way to describe it is as a cross between paul thomas anderson s magnolia and david lynch  
+            mulholland dr               
+    SENTIMENT: negativ 
 
     REVIEW: really is a pan american movie with moments of genuine insight into the urban heart                                   
     SENTIMENT: positiv 
 
-    REVIEW: the makers of mothman prophecies succeed in producing that most frightening of all movies a mediocre horror film
-            too bad to be good and too good to be bad                     
+    REVIEW: the makers of mothman prophecies succeed in producing that most frightening of all movies a mediocre
+            horror film too bad to be good and too good to be bad                     
     SENTIMENT: positiv 
 
-    REVIEW: the sundance film festival has become so buzz obsessed that fans and producers descend upon utah each january 
-             to ferret out the next great thing tadpole was one of the films so declared this year but it s really more of 
-             the next pretty good thing    
+    REVIEW: the sundance film festival has become so buzz obsessed that fans and producers descend upon utah 
+            each january to ferret out the next great thing tadpole was one of the films so declared this year
+            but it s really more of the next pretty good thing    
     SENTIMENT: positiv 
 
     REVIEW: i don t think this movie loves women at all                                        
@@ -88,7 +92,7 @@ After the training some samples from the validation set are selected and the mod
 
     REVIEW: even if the ring has a familiar ring it s still unusually crafty and intelligent for hollywood horror                           SENTIMENT: positiv 
 
-    REVIEW: expands the horizons of boredom to the point of collapse turning into a black hole of dullness from which no 
-            interesting concept can escape                          
+    REVIEW: expands the horizons of boredom to the point of collapse turning into a black hole of dullness 
+            from which no interesting concept can escape                          
     SENTIMENT: negativ 
 
