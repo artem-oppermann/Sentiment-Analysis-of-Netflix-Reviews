@@ -5,7 +5,7 @@ Sentiment Analysis with bi-LSTM's recurrent neural network's.
 The model consists of a bidirectional one layer long short term memory reccurent neural network. It is trained on roughly 5000 one-sentence labeled positiv and negativ Netflix reviews. The model's purpose is to learn to recognize a sentiment of a review and classify it whether as a positiv or a negativ review. 
 
 The training of the model needs only about three epoch to reach an accuracy of roughly 75% on the validation set consisting of 1000 reviews. After that the accuracy goes never beyond 78 %. It can be observed that the training accuracy goes very fast towards 90-95% due to overfitting of the model. To prevent this I use a L2 regularization.
-Here is an example for the training for 5 epochs and its summarys: ::
+Here is an example for the training for 5 epochs and its summarys: :::
 
     epoch_nr: 0, batch_nr: 200/603, train_loss: 0.749, train_acc: 0.556, val_acc: 0.596 
     epoch_nr: 0, batch_nr: 300/603, train_loss: 0.740, train_acc: 0.596, val_acc: 0.544 
