@@ -8,6 +8,7 @@ import json
 import os
 import os.path as path
 from pathlib import Path
+import random
 
 root_path = Path(__file__).parents[2]
 
@@ -26,27 +27,12 @@ TEST_DATA=os.path.abspath(os.path.join(root_path, 'data/preprocessed/test.txt'))
 WORD2IDX_PATH=os.path.abspath(os.path.join(root_path, 'data/preprocessed/word2idx.txt'))
 
 
-
-def remove_punctuation(s):
-    return s.translate(string.punctuation)
-
-def get_tags(s):
-    tuples = pos_tag(word_tokenize(s))
-    return [y for x, y in tuples]
-
-def encode_training_data(x_train,word2idx):
-    
-    x_train_encoded=[]
-    
-    for sequence in x_train:
-        
-        x=np.array([word2idx[sequence[i]] for i in range(0,len(sequence))])
-        x_train_encoded.append(x)
-    
-    return x_train_encoded
+TEST_SIZE=0.2
 
 
 def clean_data():
+    '''Remove numbers and other special characters from the sentences in the raw files
+    and write cleaned sentences to new files.'''
     
 
     files_path=[POS_FILES_PATH,NEG_FILES_PATH]
@@ -63,8 +49,9 @@ def clean_data():
                     if len(line)>1:
                         writer.write(line+'\n')
                         
-                        
 def write_word2idx():
+    '''Assign a number to each unique word. Create a dictionary where each key is a unique word with an integer 
+    as value and write this dictionary to a file. '''
     
     cleaned_files_path=[POS_FILES_CLENED_PATH, NEG_FILES_CLENED_PATH]
 
@@ -74,36 +61,17 @@ def write_word2idx():
     for file in cleaned_files_path:
         for line in open(file):
             tokens=word_tokenize(line)
-            if len(tokens)>1:
-                for token in tokens:     
-                    if token not in word2idx:
-                        word2idx[token]=num_words
-                        num_words+=1             
+            for token in tokens:     
+                if token not in word2idx:
+                    word2idx[token]=num_words
+                    num_words+=1             
                     
-
-
-    
     with open(WORD2IDX_PATH, 'w') as outfile:  
-        json.dump(word2idx, outfile)
-                   
-
-def word2idx():
-    
-    with open(WORD2IDX_PATH) as json_file:  
-        word2idx = json.load(json_file)
+        json.dump(word2idx, outfile)  
         
-    cleaned_files_path=[POS_FILES_CLENED_PATH, NEG_FILES_CLENED_PATH]
-    
-    for file in cleaned_files_path:
-        for line in open(file):
-            tokens=word_tokenize(line)
-            if len(tokens)>1:
-                for token in tokens:     
-                    print(word2idx[token])   
-
-
 
 def add_label():
+    '''Add a label of either 0 (genative) or 1 (positive) to each review and write it to a new .txt-file'''
     
     cleaned_files_path=[NEG_FILES_CLENED_PATH, POS_FILES_CLENED_PATH]
     labels=[0,1]
@@ -112,21 +80,24 @@ def add_label():
         for file, label in zip(cleaned_files_path, labels):
             for line in open(file):
                 line=line.rstrip('\n') + '| ' + str(label)+'\n'
-                writer.write(line)
-
+                writer.write(line)    
                 
+                        
 def shuffle_file():
-    
-    import random
+    '''Shuffle the data in the file '''
     with open(FILES_CLEANED_LABELED,'r') as source:
         data = [ (random.random(), line) for line in source ]
     data.sort()
     with open(FINAL_FILE,'w') as target:
         for _, line in data:
-            target.write( line )
-            
+            target.write( line )                   
+                        
+                                            
+
+          
 
 def count_labels():
+    '''Count the number of positive and negative reviews '''
     
     files=[TRAIN_DATA, TEST_DATA]
     
@@ -147,15 +118,53 @@ def count_labels():
         
         print('File %s contains %s positives and %s negatives'%(file, num_positives, num_negatives))
 
-                        
+def print_word2idx():
+    '''Print the word2idx dictionary '''
+    with open(WORD2IDX_PATH) as json_file:  
+        word2idx = json.load(json_file)
+        
+    cleaned_files_path=[POS_FILES_CLENED_PATH, NEG_FILES_CLENED_PATH]
+    
+    for file in cleaned_files_path:
+        for line in open(file):
+            tokens=word_tokenize(line)
+            if len(tokens)>1:
+                for token in tokens: 
+                    word2idx[token]  
+
+def file_len(fname):
+    '''Count the number of lines in the file '''
+    with open(fname) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1  
+
+def train_test_split():  
+    '''Split the data into training and testing set '''
+                
+    n_lines=file_len(FINAL_FILE)    
+    n_train=int(n_lines*(1.0-TEST_SIZE))
+        
+    train_writer= open(TRAIN_DATA, 'w')
+    test_writer= open(TEST_DATA, 'w')
+    
+    with open(FINAL_FILE) as f:
+        for i, l in enumerate(f):
+            if i<n_train:
+                train_writer.write(l)
+            else:
+                test_writer.write(l)
+          
+        
 if __name__ == "__main__":
     
     clean_data()
     write_word2idx()
     add_label()
     shuffle_file()
+    #print_word2idx()
+    train_test_split()
     count_labels()
-    #word2idx()
 
 
 

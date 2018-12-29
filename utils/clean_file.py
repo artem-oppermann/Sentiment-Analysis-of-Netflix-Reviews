@@ -81,6 +81,8 @@ def write_word2idx():
     
     with open(WORD2IDX_PATH, 'w') as outfile:  
         json.dump(word2idx, outfile)
+    
+    print(word2idx)
                    
 
 def word2idx():
@@ -146,7 +148,7 @@ def count_labels():
                         
 if __name__ == "__main__":
     
-    clean_data()
+    #clean_data()
     write_word2idx()
     add_label()
     shuffle_file()

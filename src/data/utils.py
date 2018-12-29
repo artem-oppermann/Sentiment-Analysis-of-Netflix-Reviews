@@ -11,29 +11,32 @@ def show_sample(FLAGS, infer,sess, line_encoded_test):
         
     idx2word = {v: k for k, v in word2idx.items()}    
     
-    idx = np.random.choice(FLAGS.num_test_samples, size=20, replace=False)
+    idx = np.random.choice(FLAGS.num_test_samples, size=5, replace=False)
 
     lines=sess.run(line_encoded_test)
-    _,predictions=sess.run(infer)
+    logits,probs,predictions =sess.run(infer)
     
     lines=np.array(lines)[idx]
     predictions=np.array(predictions)[idx]
 
     print('\n\nTEST SAMPLES: \n')
-    for line, p in zip(lines, predictions):
-        translate_idx2word(idx2word,line, p)
+    for line, pred, p, l in zip(lines, predictions, probs, logits):
+        translate_idx2word(idx2word,line, pred, p, l)
     
-def translate_idx2word(idx2word,line, p):
+def translate_idx2word(idx2word,line, pred, p, l):
     
     line=[idx2word[idx] for idx in line]
     line=' '.join(line).replace('PAD', '')
     
-    if p==0:
+    if pred==0:
         sentiment='negativ'
-    elif p==1:
+    elif pred==1:
         sentiment='positiv'
     
-    print('REVIEW: %s \nSENTIMENT: %s \n' %(line,sentiment))
+    neg=p[0]
+    pos=p[1]
+    #print('REVIEW: %s \nSENTIMENT: %s \n' %(line,sentiment))
+    print('REVIEW: %s \n positiv opinion: %f \n negative opinion: %f ' %(line, pos, neg))
 
 
 

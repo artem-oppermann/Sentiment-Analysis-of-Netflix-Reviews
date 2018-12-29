@@ -1,131 +1,149 @@
-# -*- coding: utf-8 -*-
 """
+Trains a LSTM network to perform Sentiment Analysis
+
 Created on Wed Dec 26 18:38:43 2018
 
-@author: Admin
+@author: Artem Oppermann
 """
-
-import tensorflow as tf
-from utils import show_sample
-from model import Model
 import json
-import numpy as np
-from random import randint
 import os
+import tensorflow as tf
 
-tf.app.flags.DEFINE_string('train_path', os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'data/tf_records/train')), 
+from data.dataset import get_training_data, get_test_data
+from models.train_model import TrainModel
+
+
+tf.app.flags.DEFINE_string('train_path', os.path.abspath(os.path.join(os.path.dirname( "__file__" ), '..', 'data/tf_records/training_file_0.tfrecord')), 
                            'Path for the training data.')
-tf.app.flags.DEFINE_string('test_path', os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'data/tf_records/test')), 
+tf.app.flags.DEFINE_string('test_path', os.path.abspath(os.path.join(os.path.dirname("__file__"), '..', 'data/tf_records/test_file_0.tfrecord')), 
                            'Path for the test data.')
 
-tf.app.flags.DEFINE_string('word2idx', os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'data/preprocessed/word2idx.txt')), 
+tf.app.flags.DEFINE_string('word2idx', os.path.abspath(os.path.join(os.path.dirname("__file__"), '..', 'data/preprocessed/word2idx.txt')), 
                            'Path for the word2idx dictionary.')
 
+tf.app.flags.DEFINE_string('checkpoints_path', os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'checkpoints/model.ckpt')), 
+                           'Path for the test data.')
 
-tf.app.flags.DEFINE_integer('num_epoch', 5,
+tf.app.flags.DEFINE_integer('num_epoch', 1000,
                             'Number of training epoch.'
                             )
-tf.app.flags.DEFINE_integer('batch_size', 16,
+tf.app.flags.DEFINE_integer('batch_size', 32,
                             'Batch size of the training set.'
                             )
-tf.app.flags.DEFINE_float('learning_rate', 0.0001,
+tf.app.flags.DEFINE_float('learning_rate', 0.0005,
                           'Learning rate of optimizer.'
                           )
 
-tf.app.flags.DEFINE_boolean('l2_reg', True,
-                            'L2 regularization.'
-                            )
-tf.app.flags.DEFINE_float('lambda_', 0.001,
-                          'Lambda parameter for L2 regularization.'
+tf.app.flags.DEFINE_string('architecture', 'unidirectional',
+                          'Type of LSTM-Architecture, choose between "unidirectional" or "bidirectional"'
                           )
-tf.app.flags.DEFINE_integer('lstm_units', 20,
+
+tf.app.flags.DEFINE_integer('lstm_units', 100,
                             'Number of the LSTM hidden units.'
                             )
 
-tf.app.flags.DEFINE_integer('embedding_size', 30,
+tf.flags.DEFINE_float('dropout_keep_prob', 0.5,
+                      '0<dropout_keep_prob<=1. Dropout keep-probability')
+
+tf.app.flags.DEFINE_integer('embedding_size', 100,
                             'Dimension of the embedding vector for the vocabulary.'
                             )
 tf.app.flags.DEFINE_integer('num_classes', 2,
                             'Number of output classes.'
                             )
 
-tf.app.flags.DEFINE_integer('eval_after', 100,
-                            'Evaluate after number of batches.'
-                            )
-
-tf.app.flags.DEFINE_integer('num_train_samples', 9662,
+tf.app.flags.DEFINE_integer('n_train_samples', 8529,
                             'Number of all training sentences.'
                             )
 
-tf.app.flags.DEFINE_integer('num_test_samples', 1000,
+tf.app.flags.DEFINE_integer('n_test_samples', 2133,
                             'Number of all training sentences.'
                             )
 
 FLAGS = tf.app.flags.FLAGS
 
 
-   
 
 def main(_):
     
     with open(FLAGS.word2idx) as json_file:  
         word2idx = json.load(json_file)
-         
-    num_batches=int(FLAGS.num_train_samples/FLAGS.batch_size)   
-    
+
     training_graph=tf.Graph()
     
     with training_graph.as_default():
-      
-        training_set=_get_training_data(FLAGS)  
-        test_set=_get_test_data(FLAGS)  
         
-        iterator_train = training_set.make_initializable_iterator()
-        iterator_test= test_set.make_initializable_iterator()
-
-        line_encoded_train, label_encoded_train, labels_true, seq_length_train= iterator_train.get_next()
-        line_encoded_test, label_encoded_test, _, seq_length_test=iterator_test.get_next()
+        train_model=TrainModel(FLAGS, len(word2idx))
         
-        model=Model(FLAGS,word2idx)
+        training_dataset=get_training_data(FLAGS)
+        test_dataset=get_test_data(FLAGS)
         
-        train_op, loss_op, acc_op_train=model.optimize(line_encoded_train, label_encoded_train, seq_length_train)
-        acc_op_val=model.accuracy(line_encoded_test, label_encoded_test, seq_length_test)
-        infer=model.inference(line_encoded_test, seq_length_test)
+        iterator_train = training_dataset.make_initializable_iterator()
+        iterator_test=test_dataset.make_initializable_iterator()
+        
+        x_train, y_train, _, seq_length_train = iterator_train.get_next()
+        x_test, y_test, _, seq_length_test =iterator_test.get_next()
     
-        with tf.Session(graph=training_graph) as sess:
+        dropout_keep_prob = tf.placeholder(tf.float32, name='dropout_keep_prob')
+        
+        logits, probs=train_model.compute_prediction(x_train, seq_length_train, dropout_keep_prob, reuse_scope=False)
+        loss=train_model.compute_loss(logits, y_train)
+        train_op=train_model.train(loss)
+        accuracy_train = train_model.compute_accuracy(probs, y_train)
+        
+        _, probs_test=train_model.compute_prediction(x_test, seq_length_test, dropout_keep_prob, reuse_scope=True) 
+        accuracy_test = train_model.compute_accuracy(probs_test, y_test)
+
+        saver=tf.train.Saver()
+        
+    with tf.Session(graph=training_graph) as sess:
+        
+        sess.run(tf.global_variables_initializer())
+        
+        n_batches=int(FLAGS.n_train_samples/FLAGS.batch_size)   
+
+        for epoch in range(FLAGS.num_epoch):
             
-            sess.run(tf.global_variables_initializer())
-    
-            for epoch in range(FLAGS.num_epoch):
+            sess.run(iterator_train.initializer)
+            sess.run(iterator_test.initializer)
+            
+            traininig_loss=0
+            training_acc=0
+            
+            test_acc=0
+              
+            feed_dict={dropout_keep_prob:0.5}
+           
+            for n_batch in range(0, n_batches):
                 
-                sess.run(iterator_train.initializer)
-
-                traininig_loss=0
-                training_acc=0
+                _, l, acc, logits_, probs_=sess.run((train_op, loss, accuracy_train, logits, probs), feed_dict)
                 
-                for num_batch in range(num_batches):
+                traininig_loss+=l
+                training_acc+=acc
+            
+            for n in range(0, FLAGS.n_test_samples):
+                
+                feed_dict={dropout_keep_prob:1.0}
+                
+                acc=sess.run(accuracy_test, feed_dict)
+                test_acc+=acc
                     
-                    sess.run(iterator_test.initializer)
-                    _, loss_, acc_=sess.run((train_op,loss_op,acc_op_train))
-                    
-                    traininig_loss+=loss_
-                    training_acc+=acc_
-                    
-                    if num_batch!=0 and num_batch%FLAGS.eval_after==0:
-                       
-                        acc_val=sess.run(acc_op_val)
-                    
-                        print('epoch_nr: %i, batch_nr: %i/%i, train_loss: %.3f, train_acc: %.3f, val_acc: %.3f \n'%
-                              (epoch, num_batch, num_batches,(traininig_loss/FLAGS.eval_after),(training_acc/FLAGS.eval_after),acc_val))
-                        
-                        traininig_loss=0
-                        training_acc=0
-                        
-            show_sample(FLAGS, infer,sess, line_encoded_test)
+            loss_avg=traininig_loss/n_batches
+            acc_avg_train=training_acc/n_batches
+            
+            acc_avg_test=test_acc/FLAGS.n_test_samples
+  
+            print('epoch_nr: %i, train_loss: %.3f, train_acc: %.3f, test_acc: %.3f'%(epoch, loss_avg, acc_avg_train, acc_avg_test))
 
+            traininig_loss=0
+            training_acc=0
+            
+            if acc_avg_test>0.70:
+                saver.save(sess, FLAGS.checkpoints_path)
 
-
+                
 
 if __name__ == "__main__":
     
-    tf.app.run()
+    tf.app.run() 
+    

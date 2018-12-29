@@ -7,14 +7,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 from nltk import pos_tag, word_tokenize
+from pathlib import Path
+
+root_path = Path(__file__).parents[2]
 
 
-TRAIN_DATA='C:/Users/Admin/Desktop/deep_learning _local_datasets/rt-polaritydata/train.txt' 
-TEST_DATA='C:/Users/Admin/Desktop/deep_learning _local_datasets/rt-polaritydata/test.txt' 
+WORD2IDX_PATH=os.path.abspath(os.path.join(root_path, 'data/preprocessed/word2idx.txt'))
 
-WORD2IDX_PATH='C:/Users/Admin/Desktop/deep_learning _local_datasets/rt-polaritydata/word2idx.txt' 
-OUTPUT_DIR='C:/Users/Admin/Desktop/deep_learning _local_datasets/rt-polaritydata/tf_records'
+TRAIN_DATA=os.path.abspath(os.path.join(root_path, 'data/preprocessed/train.txt'))  
+TEST_DATA=os.path.abspath(os.path.join(root_path, 'data/preprocessed/test.txt')) 
 
+OUTPUT_DIR=os.path.abspath(os.path.join(root_path, 'data/tf_records'))
 
 
 def _get_tf_filename(output_dir,name_tf_file,num_tf_file):
@@ -45,14 +48,14 @@ def _add_to_tf_records(line, tf_writer, word2idx):
     
     splitted_line=line.split('|')
     line=splitted_line[0]
-    label_encoded=int(splitted_line[1].rstrip('\n'))
-    
-    label=''
+    label=int(splitted_line[1].rstrip('\n'))
 
-    if label_encoded==1:
+    if label==1:
         label='positiv'
-    elif label_encoded==0:
+        label_encoded=[0,1]
+    elif label==0:
         label='negativ'
+        label_encoded=[1,0]
           
     idx_sequence=[]
     tokens=word_tokenize(line)
@@ -79,13 +82,11 @@ def _add_to_tf_records(line, tf_writer, word2idx):
     
     tf_writer.write(example.SerializeToString())
 
-def run(output_dir, name_tf_file):
+def run(output_dir, name_tf_file, data):
 
     if not tf.gfile.Exists(output_dir):
         tf.gfile.MakeDirs(output_dir)
         
-
-    
     with open(WORD2IDX_PATH) as json_file:  
         word2idx = json.load(json_file)
     
@@ -96,7 +97,7 @@ def run(output_dir, name_tf_file):
       
     with tf.python_io.TFRecordWriter(tfrecords_filename) as tf_writer:
 
-        for line in open(TRAIN_DATA):      
+        for line in open(data):      
             _add_to_tf_records(line, tf_writer, word2idx)
             
 
@@ -107,5 +108,6 @@ def run(output_dir, name_tf_file):
 
 if __name__ == "__main__":
     
-    run(OUTPUT_DIR,'training_file')
+    run(OUTPUT_DIR,'training_file', TRAIN_DATA)
+    run(OUTPUT_DIR,'test_file', TEST_DATA)
 

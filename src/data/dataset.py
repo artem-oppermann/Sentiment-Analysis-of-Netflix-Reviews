@@ -1,38 +1,56 @@
 import tensorflow as tf
 import numpy as np
-import json
+import os
+
+def get_training_data(FLAGS):
+
+    filenames=[FLAGS.train_path]
+
+    dataset = tf.data.TFRecordDataset(filenames)
+    dataset = dataset.map(parse)
+    dataset = dataset.shuffle(buffer_size=25000)
+    dataset = dataset.repeat()
+    dataset = dataset.padded_batch(FLAGS.batch_size,padded_shapes=([None],[None],[None], [None]))
+    dataset = dataset.prefetch(buffer_size=4)
+
+    return dataset
 
 
-def show_sample(FLAGS, infer,sess, line_encoded_test):
-    
-    with open(FLAGS.word2idx) as json_file:  
-        word2idx = json.load(json_file)
-        
-    idx2word = {v: k for k, v in word2idx.items()}    
-    
-    idx = np.random.choice(FLAGS.num_test_samples, size=20, replace=False)
+def get_test_data(FLAGS):
 
-    lines=sess.run(line_encoded_test)
-    _,predictions=sess.run(infer)
-    
-    lines=np.array(lines)[idx]
-    predictions=np.array(predictions)[idx]
+    filenames=[FLAGS.test_path]
 
-    print('\n\nTEST SAMPLES: \n')
-    for line, p in zip(lines, predictions):
-        translate_idx2word(idx2word,line, p)
-    
-def translate_idx2word(idx2word,line, p):
-    
-    line=[idx2word[idx] for idx in line]
-    line=' '.join(line).replace('PAD', '')
-    
-    if p==0:
-        sentiment='negativ'
-    elif p==1:
-        sentiment='positiv'
-    
-    print('REVIEW: %s \nSENTIMENT: %s \n' %(line,sentiment))
+    dataset = tf.data.TFRecordDataset(filenames)
+    dataset = dataset.map(parse)
+    dataset = dataset.shuffle(buffer_size=1)
+    dataset = dataset.repeat()
+    dataset = dataset.padded_batch(1,padded_shapes=([None],[None],[None], [None]))
+    dataset = dataset.prefetch(buffer_size=4)
+
+    return dataset
 
 
 
+def parse(serialized):
+
+    context={'label/encoded':tf.FixedLenFeature([2], tf.int64),
+             'text_line/encoded':tf.FixedLenFeature([], tf.string),
+             'label/label':tf.FixedLenFeature([1], tf.string),
+             'text_line/seq_length': tf.FixedLenFeature([1], tf.int64),                 
+             }
+
+
+    sequence_parsed=tf.parse_single_example(serialized,
+                                           features=context,
+                                           )
+
+    line_encoded_raw=sequence_parsed['text_line/encoded']
+    line_encoded = tf.decode_raw(line_encoded_raw, tf.int32)
+
+    label_encoded  = sequence_parsed['label/encoded']
+    label  = sequence_parsed['label/label']
+
+    seq_length  = sequence_parsed['text_line/seq_length']
+
+
+    return line_encoded, label_encoded, label, seq_length
