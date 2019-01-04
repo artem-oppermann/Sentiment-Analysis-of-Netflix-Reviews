@@ -11,6 +11,7 @@ import tensorflow as tf
 
 from data.dataset import get_training_data, get_test_data
 from models.train_model import TrainModel
+from data.utils import show_sample
 
 
 tf.app.flags.DEFINE_string('train_path', os.path.abspath(os.path.join(os.path.dirname( "__file__" ), '..', 'data/tf_records/training_file_0.tfrecord')), 
@@ -86,12 +87,12 @@ def main(_):
     
         dropout_keep_prob = tf.placeholder(tf.float32, name='dropout_keep_prob')
         
-        logits, probs=train_model.compute_prediction(x_train, seq_length_train, dropout_keep_prob, reuse_scope=False)
+        logits, probs, outputs_=train_model.compute_prediction(x_train, seq_length_train, dropout_keep_prob, reuse_scope=False)
         loss=train_model.compute_loss(logits, y_train)
         train_op=train_model.train(loss)
         accuracy_train = train_model.compute_accuracy(probs, y_train)
         
-        _, probs_test=train_model.compute_prediction(x_test, seq_length_test, dropout_keep_prob, reuse_scope=True) 
+        logits_test, probs_test, _=train_model.compute_prediction(x_test, seq_length_test, dropout_keep_prob, reuse_scope=True) 
         accuracy_test = train_model.compute_accuracy(probs_test, y_test)
 
         saver=tf.train.Saver()
@@ -113,10 +114,16 @@ def main(_):
             test_acc=0
               
             feed_dict={dropout_keep_prob:0.5}
+            
            
             for n_batch in range(0, n_batches):
-                
+              
                 _, l, acc, logits_, probs_=sess.run((train_op, loss, accuracy_train, logits, probs), feed_dict)
+                
+                #out=sess.run(outputs_, feed_dict)
+                #print(out)
+                #print(out.shape)
+                #sd
                 
                 traininig_loss+=l
                 training_acc+=acc
@@ -137,6 +144,8 @@ def main(_):
 
             traininig_loss=0
             training_acc=0
+            
+            #show_sample(FLAGS, train_model, sess, x_test, seq_length_test, dropout_keep_prob)
             
             if acc_avg_test>0.70:
                 saver.save(sess, FLAGS.checkpoints_path)

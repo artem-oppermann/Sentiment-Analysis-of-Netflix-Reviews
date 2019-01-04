@@ -11,7 +11,7 @@ class BaseModel:
     def __init__(self,FLAGS, vocab_size):
         """
         Base class for the deep learning LSTM model for sentiment analysis. 
-        Is enherited by the training and inference models.
+        Is enherited by the training and inference classes.
         
         :param FLAGS: tf.Flags
         :param vocab_size: number of words in the dataset
@@ -57,11 +57,21 @@ class BaseModel:
             l=tf.squeeze(seq_length)
 
             # Dynamically unroll LSTM cells
-            outputs, _ = tf.nn.dynamic_rnn(lstm_cell, x, dtype=tf.float32, sequence_length=l)
+            outputs_, _ = tf.nn.dynamic_rnn(lstm_cell, x, dtype=tf.float32, sequence_length=l)
             
-            outputs = tf.reduce_mean(outputs, reduction_indices=[1])
+            #outputs = tf.reduce_mean(outputs_, reduction_indices=[1])
             
-        return outputs
+            value = tf.transpose(outputs_, [1, 0, 2])
+            print(value.shape)
+            print(value.shape[0])
+            print(value.get_shape())
+            
+            last = tf.gather(value, (value.get_shape()[0] - 1))
+            df
+            
+            #outputs=outputs_[:,0,:]
+            
+        return last, last
     
     def __rnn_layer_bidirectional(self, x, seq_length, dropout_keep_prob, scope_name="rnn_layer"):
         """
@@ -105,9 +115,9 @@ class BaseModel:
         
         with tf.variable_scope('inference', reuse=reuse_scope):
             
-            logits, probabilities=self.inference(x, seq_length, dropout_keep_prob)
+            logits, probabilities, outputs_=self.inference(x, seq_length, dropout_keep_prob)
         
-        return logits, probabilities    
+        return logits, probabilities, outputs_  
         
     
     def inference(self, x, seq_length, dropout_keep_prob):
@@ -127,7 +137,7 @@ class BaseModel:
         if self.FLAGS.architecture=="bidirectional":
             outputs = self.__rnn_layer_bidirectional(embedded_words, seq_length, dropout_keep_prob, "lstm_layer")
         elif self.FLAGS.architecture=="unidirectional":
-            outputs = self.__rnn_layer_unidirectional(embedded_words, seq_length, dropout_keep_prob, "lstm_layer")
+            outputs, outputs_ = self.__rnn_layer_unidirectional(embedded_words, seq_length, dropout_keep_prob, "lstm_layer")
                      
         # Final output layer
         with tf.variable_scope('output_layer'):
@@ -140,6 +150,6 @@ class BaseModel:
             W1=tf.get_variable('W1', shape=(n_hidden,self.FLAGS.num_classes))    
             logits=tf.matmul(outputs,W1)
         
-        return logits, tf.nn.softmax(logits, name='probabilities')
+        return logits, tf.nn.softmax(logits, name='probabilities'), outputs_
     
     
