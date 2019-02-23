@@ -1,5 +1,7 @@
 # Sentiment-Analysis-of-Netflix-Reviews
-Sentiment Analysis with bi-LSTM's recurrent neural network's.
+
+In this project a neural network model based on recurrent neural networks aims to predict whether a Netflix review conveys a positive or a negative reviews. For each sentiment the models predict a percentage values which gives the probability for beeing that particular sentiment.
+
 
 
 The model consists of a bidirectional one layer long short term memory reccurent neural network. It is trained on roughly 5000 one-sentence labeled positiv and negativ Netflix reviews. The model's purpose is to learn to recognize a sentiment of a review and classify it whether as a positiv or a negativ review. 
