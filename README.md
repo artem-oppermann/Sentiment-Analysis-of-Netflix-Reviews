@@ -4,6 +4,15 @@ In this project a Neural Network model based on Recurrent Neural Networks aims t
 
 In case of Recurrent Neural Network I am using Long-Short-Term-Memory (LSTMs) networks. Via input arguments the user can specify whether these LSTMs should be bi-directional or uni-directional. A Dropout wrapper around the LSTMs prevents the overfitting.
 
+## Getting Started
+### Prerequisites
+
+### Start the Training of The Model
+
+### Run Inference Tests
+
+## Deployment
+
 
 The model consists of a bidirectional one layer long short term memory reccurent neural network. It is trained on roughly 5000 one-sentence labeled positiv and negativ Netflix reviews. The model's purpose is to learn to recognize a sentiment of a review and classify it whether as a positiv or a negativ review. 
 
