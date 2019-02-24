@@ -21,12 +21,15 @@ To start the training of the model run the python script `src\train.py`, with (o
             --num_epoch=25 \
             --batch_size=32 \
             --learning_rate=0.0005 \
-            --architecture=uni_directional \
+            --architecture=uni_directional (or bi-directional) \
             --lstm_units=100  \
             --dropout_keep_prob=0.5 \
             --embedding_size=100  \
+            --required_acc_checkpoint=0.7 \
             
-After the execution, the training should start. YOu can observe the training loss and the accuracy on the training set and test set. Accuracy gives the ratio of correctly predicted sentiment of a given Netflix Review. You may see results like these:
+The meaning of these hyperparameters can be found in the documentations of `tf.FLAGS` in `train.py`.        
+
+After the execution, the training of the model should start. You can observe the training loss and the accuracy on the training set and test set. Accuracy gives the ratio of correctly predicted sentiment of a given Netflix Review. You may see results like these:
        
             epoch_nr: 0, train_loss: 0.654, train_acc: 0.629, test_acc: 0.737
             epoch_nr: 1, train_loss: 0.451, train_acc: 0.809, test_acc: 0.753
@@ -39,12 +42,12 @@ After the execution, the training should start. YOu can observe the training los
             epoch_nr: 8, train_loss: 0.055, train_acc: 0.984, test_acc: 0.725
             epoch_nr: 9, train_loss: 0.048, train_acc: 0.986, test_acc: 0.727
             epoch_nr: 10, train_loss: 0.044, train_acc: 0.987, test_acc: 0.723
-
-### Run Inference Tests
-
+            
 
 
 ## Deployment
+
+
 
 
 ### Authors
