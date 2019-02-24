@@ -60,7 +60,7 @@ class TrainModel(BaseModel):
         
         # Compute cross entropy loss of shape [batch_size]
         with tf.name_scope('cross_entropy'):
-            cross_entropy_loss = tf.nn.softmax_cross_entropy_with_logits(logits=scores, labels=target, name='cross_entropy')
+            cross_entropy_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=scores, labels=target, name='cross_entropy')
         
         # Take the mean of the ross entropy loss
         with tf.name_scope('loss'):

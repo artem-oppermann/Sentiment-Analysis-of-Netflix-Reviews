@@ -24,7 +24,7 @@ def get_test_data(FLAGS):
     dataset = dataset.map(parse)
     dataset = dataset.shuffle(buffer_size=1)
     dataset = dataset.repeat()
-    dataset = dataset.padded_batch(1,padded_shapes=([None],[None],[None], [None]))
+    dataset = dataset.padded_batch(FLAGS.n_test_samples,padded_shapes=([None],[None],[None], [None]))
     dataset = dataset.prefetch(buffer_size=4)
 
     return dataset

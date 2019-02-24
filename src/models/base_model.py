@@ -21,7 +21,12 @@ class BaseModel:
         self.vocab_size=vocab_size
     
     def __word_embeddings(self, x):    
-        """High dimensional vector embeddings for the words"""
+        """High dimensional vector embeddings for the words
+        
+        :param x: unique index of the word that should be embedded
+        
+        :return embedded_words: High dimensional embedding of :param x, with shape [self.FLAGS.embedding_size]
+        """
         
         with tf.variable_scope('word_embeddings'):
             We=tf.get_variable('embedding_matrix', shape=(self.vocab_size, self.FLAGS.embedding_size), dtype=tf.float32)
@@ -46,6 +51,7 @@ class BaseModel:
         Builds a unidirectional LSTM layer
         :param x: Input with shape [batch_size, max_length]
         :param seq_len: Sequence length tensor with shape [batch_size,1]
+        
         :return: outputs with shape [batch_size, max_seq_len, hidden_size]
         """
         with tf.variable_scope(scope_name, default_name='rnn_layer'):
@@ -54,24 +60,14 @@ class BaseModel:
             lstm_cell = self.__cell(dropout_keep_prob)
             
             # Remove the unnecessary dimension 
-            l=tf.squeeze(seq_length)
+            seq_length=tf.squeeze(seq_length)
 
             # Dynamically unroll LSTM cells
-            outputs_, _ = tf.nn.dynamic_rnn(lstm_cell, x, dtype=tf.float32, sequence_length=l)
+            outputs, _ = tf.nn.dynamic_rnn(lstm_cell, x, dtype=tf.float32, sequence_length=seq_length)
             
-            #outputs = tf.reduce_mean(outputs_, reduction_indices=[1])
-            
-            value = tf.transpose(outputs_, [1, 0, 2])
-            print(value.shape)
-            print(value.shape[0])
-            print(value.get_shape())
-            
-            last = tf.gather(value, (value.get_shape()[0] - 1))
-            df
-            
-            #outputs=outputs_[:,0,:]
-            
-        return last, last
+            outputs_mean = tf.reduce_mean(outputs, reduction_indices=[1])
+                     
+        return outputs_mean
     
     def __rnn_layer_bidirectional(self, x, seq_length, dropout_keep_prob, scope_name="rnn_layer"):
         """
@@ -115,14 +111,14 @@ class BaseModel:
         
         with tf.variable_scope('inference', reuse=reuse_scope):
             
-            logits, probabilities, outputs_=self.inference(x, seq_length, dropout_keep_prob)
+            logits, probabilities=self.inference(x, seq_length, dropout_keep_prob)
         
-        return logits, probabilities, outputs_  
+        return logits, probabilities  
         
     
     def inference(self, x, seq_length, dropout_keep_prob):
-        """Perfromance the inference operation which the computation of logits and 
-        probabilities 
+        """Perfoms the inference operation which is the computation of logits
+        and probabilities for a certain sentiment
         
         :param x: input sequences of shape [batch_size, max_length]
         :param seq_length: length of input sequences of shape [batch_size]
@@ -137,7 +133,7 @@ class BaseModel:
         if self.FLAGS.architecture=="bidirectional":
             outputs = self.__rnn_layer_bidirectional(embedded_words, seq_length, dropout_keep_prob, "lstm_layer")
         elif self.FLAGS.architecture=="unidirectional":
-            outputs, outputs_ = self.__rnn_layer_unidirectional(embedded_words, seq_length, dropout_keep_prob, "lstm_layer")
+            outputs = self.__rnn_layer_unidirectional(embedded_words, seq_length, dropout_keep_prob, "lstm_layer")
                      
         # Final output layer
         with tf.variable_scope('output_layer'):
@@ -147,9 +143,9 @@ class BaseModel:
             if self.FLAGS.architecture=="bidirectional":
                 n_hidden=self.FLAGS.lstm_units*2
             
-            W1=tf.get_variable('W1', shape=(n_hidden,self.FLAGS.num_classes))    
-            logits=tf.matmul(outputs,W1)
+            W1=tf.get_variable('W1', shape=(n_hidden,self.FLAGS.num_classes)) 
+            
+            logits=tf.matmul(outputs,W1, name='logits')
         
-        return logits, tf.nn.softmax(logits, name='probabilities'), outputs_
-    
-    
+        return logits, tf.nn.softmax(logits, name='probabilities')
+

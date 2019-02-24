@@ -60,6 +60,10 @@ tf.app.flags.DEFINE_integer('n_train_samples', 8529,
 tf.app.flags.DEFINE_integer('n_test_samples', 2133,
                             'Number of all training sentences.'
                             )
+tf.app.flags.DEFINE_float('required_acc_checkpoint', 0.7,
+                          'The accuracy on the test set that must be achieved, before any checkpoints are saved.'
+                          )
+
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -87,12 +91,13 @@ def main(_):
     
         dropout_keep_prob = tf.placeholder(tf.float32, name='dropout_keep_prob')
         
-        logits, probs, outputs_=train_model.compute_prediction(x_train, seq_length_train, dropout_keep_prob, reuse_scope=False)
+        logits, probs=train_model.compute_prediction(x_train, seq_length_train, dropout_keep_prob, reuse_scope=False)
         loss=train_model.compute_loss(logits, y_train)
         train_op=train_model.train(loss)
         accuracy_train = train_model.compute_accuracy(probs, y_train)
         
-        logits_test, probs_test, _=train_model.compute_prediction(x_test, seq_length_test, dropout_keep_prob, reuse_scope=True) 
+        x=tf.identity(x_test)
+        logits_test, probs_test=train_model.compute_prediction(x_test, seq_length_test, dropout_keep_prob, reuse_scope=True) 
         accuracy_test = train_model.compute_accuracy(probs_test, y_test)
 
         saver=tf.train.Saver()
@@ -111,7 +116,6 @@ def main(_):
             traininig_loss=0
             training_acc=0
             
-            test_acc=0
               
             feed_dict={dropout_keep_prob:0.5}
             
@@ -119,35 +123,26 @@ def main(_):
             for n_batch in range(0, n_batches):
               
                 _, l, acc, logits_, probs_=sess.run((train_op, loss, accuracy_train, logits, probs), feed_dict)
-                
-                #out=sess.run(outputs_, feed_dict)
-                #print(out)
-                #print(out.shape)
-                #sd
-                
+                                
                 traininig_loss+=l
                 training_acc+=acc
-            
-            for n in range(0, FLAGS.n_test_samples):
                 
-                feed_dict={dropout_keep_prob:1.0}
+                  
+            feed_dict={dropout_keep_prob:1.0}
                 
-                acc=sess.run(accuracy_test, feed_dict)
-                test_acc+=acc
-                    
+            acc_avg_test=sess.run(accuracy_test, feed_dict)
+       
             loss_avg=traininig_loss/n_batches
             acc_avg_train=training_acc/n_batches
-            
-            acc_avg_test=test_acc/FLAGS.n_test_samples
-  
+
             print('epoch_nr: %i, train_loss: %.3f, train_acc: %.3f, test_acc: %.3f'%(epoch, loss_avg, acc_avg_train, acc_avg_test))
 
             traininig_loss=0
             training_acc=0
             
-            #show_sample(FLAGS, train_model, sess, x_test, seq_length_test, dropout_keep_prob)
+            #show_sample(FLAGS, sess, logits_test, probs_test, dropout_keep_prob, x)
             
-            if acc_avg_test>0.70:
+            if self.FLAGS.required_acc_checkpoint>0.70:
                 saver.save(sess, FLAGS.checkpoints_path)
 
                 

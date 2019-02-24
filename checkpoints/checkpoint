@@ -1,2 +1,2 @@
-model_checkpoint_path: "C:\\Users\\Admin\\Desktop\\Medium\\Sentiment Analysis\\Sentiment-Analysis-of-Netflix-Reviews\\checkpoints\\model.ckpt"
-all_model_checkpoint_paths: "C:\\Users\\Admin\\Desktop\\Medium\\Sentiment Analysis\\Sentiment-Analysis-of-Netflix-Reviews\\checkpoints\\model.ckpt"
+model_checkpoint_path: "C:\\Users\\Admin\\Dropbox\\Medium\\Sentiment Analysis\\Sentiment-Analysis-of-Netflix-Reviews\\checkpoints\\model.ckpt"
+all_model_checkpoint_paths: "C:\\Users\\Admin\\Dropbox\\Medium\\Sentiment Analysis\\Sentiment-Analysis-of-Netflix-Reviews\\checkpoints\\model.ckpt"
