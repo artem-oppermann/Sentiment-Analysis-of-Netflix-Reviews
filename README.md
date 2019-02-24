@@ -42,12 +42,21 @@ After the execution, the training of the model should start. You can observe the
             epoch_nr: 8, train_loss: 0.055, train_acc: 0.984, test_acc: 0.725
             epoch_nr: 9, train_loss: 0.048, train_acc: 0.986, test_acc: 0.727
             epoch_nr: 10, train_loss: 0.044, train_acc: 0.987, test_acc: 0.723
-            
 
+During training we can observe overfitting on the training set. Hence a lower value for `dropout_keep_prob` is suggested. 
+
+After the accuracy on the test set reaches the value `required_acc_checkpoint`, the model begins to save checkpoints in `checkpoints/model.ckpt` of the underlying dataflow graph and the parameters of the network.
+            
 
 ## Deployment
 
+For deployment perposes the model must be exported in the `SavedModel` format. In order to do so execute the script `src\inference.py`:
+
+            python src\inference.py \
+                  --export_path_base==model-export/
+      
+Attention: Other hyparameters must stay the same as during the training of the network.
+
+The created instance of `SavedModel` can be run in a Docker container in a cloud for example. (The documentation for this will be extended in the future.)
 
 
-
-### Authors
