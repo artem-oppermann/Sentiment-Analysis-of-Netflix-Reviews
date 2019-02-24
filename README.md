@@ -7,11 +7,19 @@ In case of Recurrent Neural Network I am using Long-Short-Term-Memory (LSTMs) ne
 ## Getting Started
 ### Prerequisites
 
-TensorFlow 1.5
+#### TensorFlow 1.5
 
-Python 3.7.1
+#### Python 3.7.1
 
 ### Data
+
+The data consists of 5000 negative and 5000 positive Netflix reviews. You can examine the reviews in `data/raw/`.
+
+I am using `tf.Data API` to ensure a fast, high performance data input pipeline. `tf.DATA API` works the best if the data is in the  `tf.Records` format.
+
+The cleaned and formatted reviews in `tf.Record` format can be found in `data\tf_records\`.
+
+You can do the cleaning of the data by yourself by executing `src\preprocess\clean_file.py`. To export the data in `tf.Records` format execute `src\data\tf_records_writer.py`.
 
 ### Start the Training of The Model
 
