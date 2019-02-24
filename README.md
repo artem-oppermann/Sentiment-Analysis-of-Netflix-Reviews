@@ -25,7 +25,8 @@ To start the training of the model run the python script `src\train.py`, with (o
             --lstm_units=100  \
             --dropout_keep_prob=0.5 \
             --embedding_size=100  \
-       
+            
+After the execution, the training should start. YOu can observe the training loss and the accuracy on the training set and test set. Accuracy gives the ratio of correctly predicted sentiment of a given Netflix Review. You may see results like these:
        
             epoch_nr: 0, train_loss: 0.654, train_acc: 0.629, test_acc: 0.737
             epoch_nr: 1, train_loss: 0.451, train_acc: 0.809, test_acc: 0.753
